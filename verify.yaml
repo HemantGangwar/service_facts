@@ -1,0 +1,35 @@
+---
+# Verification of service status
+# Use this task using below command
+# ansible-playbook -i <inventory_name> main_app_ctrl_playbook.yml --tags verify
+- name: verify services
+  hosts: all
+  tasks:
+   - name: " service status verification"
+     service_facts:
+     register: service_state
+   - name: Now displaying output of above command
+     debug:
+       var: service_state.ansible_facts.services["httpd.service"].state
+     when: inventory_hostname in groups['web'] and ansible_distribution_major_version == '7'
+   - name: Now displaying output of above command
+     debug:
+       var: service_state.ansible_facts.services["httpd"].state
+     when: inventory_hostname in groups['web'] and ansible_distribution_major_version == '6'
+   - name: Now displaying output of above command
+     debug:
+       var: service_state.ansible_facts.services["tomcat.service"].state
+     when: inventory_hostname in groups['app']
+   - name: Now displaying output of above command
+     debug:
+       var: service_state.ansible_facts.services[ "{{ item }}" ].state
+     loop:
+          - kyc-api
+          - kyc-subscriber
+          - kyc-admin
+          - kyc-workflow
+          - kyc-reports
+          - ms-si-api
+          - ms-marginx
+         
+     when: inventory_hostname in groups['kyc_services'] and  service_state.ansible_facts.services[  item  ].state is defined
