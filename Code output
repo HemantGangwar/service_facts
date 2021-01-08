@@ -1,0 +1,52 @@
+(2.5.0) [root@control appManagent]# ansible-playbook generic_application_control.yml -i inventory -b --tags verify
+
+PLAY [Playbook for application control, make sure you are using tags] ****************************************************************
+
+TASK [Gathering Facts] ***************************************************************************************************************
+ok: [dnode3]
+ok: [node6.lab.example.com]
+
+TASK [[ ------------ | Verification PLAYBOOK | ---------------- ]] *******************************************************************
+included: /root/appManagent/application-verify.yml for node6.lab.example.com, dnode3
+
+TASK [|SYSTEMD| or |INITD| status verification] **************************************************************************************
+ok: [dnode3]
+ok: [node6.lab.example.com]
+
+TASK [Now displaying output of above command] ****************************************************************************************
+skipping: [node6.lab.example.com] => (item=None)
+skipping: [node6.lab.example.com] => (item=None)
+ok: [dnode3] => (item=None) => {
+    "service_state.ansible_facts.services[\"docker.service\"].state": "running"
+}
+
+TASK [Now displaying output of above command] ****************************************************************************************
+skipping: [dnode3] => (item=None)
+ok: [node6.lab.example.com] => (item=None) => {
+    "service_state.ansible_facts.services[\"httpd\"].state": "running"
+}
+ok: [node6.lab.example.com] => (item=None) => {
+    "service_state.ansible_facts.services[\"ntpd\"].state": "running"
+}
+
+TASK [|SHELL| commands to verify status of services if applicable] *******************************************************************
+changed: [node6.lab.example.com] => (item=sh -c "sudo service httpd status")
+changed: [dnode3] => (item=sh -c "sudo systemctl status docker")
+changed: [dnode3] => (item=docker images)
+
+TASK [Now displaying output of above command] ****************************************************************************************
+ok: [node6.lab.example.com] => (item=None) => {
+    "msg": "httpd (pid  2269) is running..."
+}
+ok: [dnode3] => (item=None) => {
+    "msg": "● docker.service - Docker Application Container Engine\n   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)\n   Active: active (running) since Fri 2021-01-08 17:19:49 IST; 24min ago\n     Docs: https://docs.docker.com\n Main PID: 7128 (dockerd)\n    Tasks: 8\n   Memory: 126.5M\n   CGroup: /system.slice/docker.service\n           └─7128 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock\n\nJan 08 17:19:47 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:47.389388817+05:30\" level=info msg=\"Removing stale sandbox ingress_sbox (ingress-sbox)\"\nJan 08 17:19:47 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:47.397337805+05:30\" level=warning msg=\"Error (Unable to complete atomic operation, key modified) deleting object [endpoint 317964e48b6d7faa51b1fa325394734ba1841d52fad1060945f9b876e5cfa5ad 6edc2ce21b4e457e3dac13429eeeba4e20a019d4bebe1ab9c2d89fc15f2b06a6], retrying....\"\nJan 08 17:19:47 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:47.574561567+05:30\" level=info msg=\"Default bridge (docker0) is assigned with an IP address 172.17.0.0/16. Daemon option --bip can be used to set a preferred IP address\"\nJan 08 17:19:47 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:47.958032334+05:30\" level=info msg=\"Loading containers: done.\"\nJan 08 17:19:48 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:48.280844030+05:30\" level=info msg=\"Docker daemon\" commit=48a66213fe graphdriver(s)=overlay2 version=19.03.12\nJan 08 17:19:48 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:48.948452788+05:30\" level=error msg=\"cluster exited with error: error while loading TLS certificate in /var/lib/docker/swarm/certificates/swarm-node.crt: certificate (1 - ipgql2avt0t0tbo06lb4gvf8m) not valid after Thu, 31 Dec 2020 08:26:00 UTC, and it is currently Fri, 08 Jan 2021 17:19:48 IST: x509: certificate has expired or is not yet valid\"\nJan 08 17:19:48 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:48.948597241+05:30\" level=error msg=\"swarm component could not be started\" error=\"error while loading TLS certificate in /var/lib/docker/swarm/certificates/swarm-node.crt: certificate (1 - ipgql2avt0t0tbo06lb4gvf8m) not valid after Thu, 31 Dec 2020 08:26:00 UTC, and it is currently Fri, 08 Jan 2021 17:19:48 IST: x509: certificate has expired or is not yet valid\"\nJan 08 17:19:48 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:48.948653154+05:30\" level=info msg=\"Daemon has completed initialization\"\nJan 08 17:19:49 dnode3.technix.com systemd[1]: Started Docker Application Container Engine.\nJan 08 17:19:49 dnode3.technix.com dockerd[7128]: time=\"2021-01-08T17:19:49.200217839+05:30\" level=info msg=\"API listen on /var/run/docker.sock\""
+}
+ok: [dnode3] => (item=None) => {
+    "msg": "REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE\nhttpd               <none>              a6ea92c35c43        5 months ago        166MB\nhttpd               <none>              9d2a0c6e5b57        5 months ago        166MB\nnginx               <none>              8cf1bfb43ff5        5 months ago        132MB"
+}
+
+PLAY RECAP ***************************************************************************************************************************
+dnode3                     : ok=6    changed=1    unreachable=0    failed=0
+node6.lab.example.com      : ok=6    changed=1    unreachable=0    failed=0
+
+(2.5.0) [root@control appManagent]#
